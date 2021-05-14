@@ -1,0 +1,67 @@
+R1: Os dois segmentos escolhidos para serem analisados foram os de números 34 e
+88 no arquivo pergunta1.pcapng fornecido. Os seus respectivos protocolos da ca-
+mada mais superficial são Transport Layer Security (TLSv1.3) e  Hypertext
+Transfer Protocol (HTTP). Vale notar, no entanto, que apenas o segundo segmento
+tem um protocolo da camada de aplicação, o HTTP. O protocolo TLS, apesar de
+estar acima do TCP, não é entendido como protocolo da camada de aplicação no mo-
+delo OSI de redes. Para o mesmo, o protocolo TLS, basicamente de criptografia,
+faz parte da camada de apresentação, logo antes da camada de aplicação. Se con-
+siderarmos, contudo, um modelo mais simplificado em que não existem camadas in-
+termediárias entre as camadas de transporte e aplicação, é razoável, sim, clas-
+sificar o TLS como um protocolo da camada de aplicação.
+
+I. O site referente ao primeiro segmento foi o https://google.com. Consegui des-
+cobrir isso averiguando os IPs envolvidos na conexão, portanto lendo as colunas
+'Source' e 'Destination' do próprio Wireshark. Como um dos IPs é de minha
+própria máquina, bastou checar meu IP através do comando '$sudo igconfig -a'. O
+outro IP, portanto, seria o IP do site. A partir daí, foi apenas uma questão de
+digitar o IP no navegador e ser redirecionado para a página da Google. Para ra-
+tificar a resposta encontrada, utilizei um ferrameta de 'Reverse DNS' online
+e cheguei justamente num domínio da Google.
+
+			  IP:
+		IP origem: 192.168.68.117
+		IP destino: 142.250.79.35
+
+			  MAC:
+		MAC origem: ac:e0:10:0a:28:7f
+		MAC destino: 84:d8:1b:5e:30:3c
+
+		   Protocolo: TLSv1.3
+
+II. Para esse segundo teste, não consegui alcançar nenhum site. O IP de destino,
+número esse que consegui descobrir da exata mesma forma que no exemplo anterior,
+leva a uma página que exibe a mensagem 'Google-edge-cache', mas nada além disso.
+Apesar de não ter chegado a nenhum site, é possível inferir justamente pela men-
+sagem recebida que o servidor responsável pela resposta é da Google. Assim como
+no segmento anterior, utilizei uma ferramenta de 'Reverse DNS' para verificar
+a resposta encontrada e justamente cheguei num domínio pertencente à Google.
+
+			  IP:
+		IP origem: 192.168.68.117
+		IP destino: 34.104.35.123
+
+			  MAC:
+		MAC origem: ac:e0:10:0a:28:7f
+		MAC destino: 84:d8:1b:5e:30:3c
+
+		    Protocolo: HTTP
+
+
+R2: Para realizar essa tarefa, utilizei o filtro 'ip.addr == 200.144.244.77' do
+Wireshark. Esse filtro foi utlizado para satisfazer o requerimento de host so-
+licitado no enunciado do exercício. Agora sobre a questão do tempo de transfe-
+rência, me bastou averiguar a coluna 'Time' do Wireshark. Foi necessário, pois,
+1.0334377880000005 segundo para fazer a transferência do arquivo em questão - 
+conta essa feita subtraindo o instante inicial do instante final, portanto,
+10.753411564 - 9.719973776. Já à respeito da sobrecarga de dados, como o arquivo
+baixado tem 6 bytes e o Wireshark registrou um tráfego de 5639 bytes - tráfego
+esse computado somando-se os valores da coluna 'Length' para todos os segmentos 
+em questão -, pode-se dizer que foi de 93883.33%. Esse número foi calculado da
+seguinte maneira:
+
+	1. 6 bytes é o tamanho do arquivo baixado, portanto nosso 100%.
+	2. 5639 bytes é o tráfego de dados real - todos os dados tanferidos.
+	3. A sobrecarga em bytes é calculada fazendo-se 5639-6=5633.
+	4. A partir daí, toma-se (5633*100)/6 para chegar à representação
+	   percentual da sobrecarga.

@@ -1,0 +1,48 @@
+			EP1 Redes de Computadores e Sistemas Distribuídos
+
+Autor: Luis Vitor Zerkowski
+NUSP: 9837201
+Disciplina: MAC0352
+Professor: Daniel Batista
+
+Para rodar o programa:
+	1. Utilize o makefile para compilar o programa com o comando $make
+	2. Uma vez com o executável 'ep1' em mãos, basta rodar o programa com o comando $./ep1 <port>
+
+Exemplo de uso:
+	$make
+	$./ep1 1883
+
+OBS 1: Para apagar arquivos indesejados depois de usar o programa, basta rodar o comando $make clean.
+
+OBS 2: Apesar da não obrigatoriedade, recomenda-se fortemente o uso da porta 1883 por ser a porta
+       padrão do MQTT. Para melhor verificar a troca de pacotes entre o servidor e os clientes utili-
+       zando o Wireshark, estar na porta 1883 faz com que o protocolo seja rapidamente identificável
+       e, dessa forma, mais facilmente acompanhado.
+
+Sobre o programa:
+	Este programa é um servidor para o protocolo MQTT - também conhecido como broker. Ele permite
+	a conexão de um ou mais clientes simultâneos, tanto para publicação quanto para inscrição.
+	Seguindo a proposta do protocolo em questão, um cliente que se inscreve escolhe um tópico
+	para se inscrever - no nosso caso, apenas uma string, sem hierarquia de pastas nem nada além
+	de caracteres alfanuméricos. Já o cliente que publica escolhe um tópico no qual vai publicar,
+	seguindo as mesmas regras anteriormente descritas, e depois escolhe a mensagem que será pu-
+	blicada. Ambos os clientes têm, por fim, a opão de desconexão. No caso do cliente inscrito,
+	essa possibilidade dá-se através das teclas ctrl+c - a típica interrupção do teclado. Já no
+	caso do cliente de publicação, a desconexão acontece de forma automática após a publicação
+	da mensagem desejada no tópico escolhido.
+	
+	Para testar o uso dos clientes, recomenda-se usar o mosquitto-clients. Segue, portanto, um
+	exemplo de uso dos mesmos - note que é importante já ter o broker rodando para obter as
+	funcionalidades desejadas dos clientes:
+	
+		cliente sub:
+			$mosquitto_sub -t 'topico1' -V 5
+
+		cliente pub:
+			$mosquitto_pub -t 'topico1' -m 'Estou escrevendo no tópico 1' -V 5
+
+	OBS: Nesse exemplo, o argumento '-p' não foi acionado pois espera-se que o broker já esteja
+	     rodando na porta padrão (1883). Além disso, o argumento '-V 5' foi utilizado para ga-
+	     rantir que os clientes estarão comportando-se de acordo com a versão 5 do protocolo
+	     MQTT.
