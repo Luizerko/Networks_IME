@@ -40,6 +40,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 
 #define LISTENQ 1
 #define MAXDATASIZE 100
@@ -58,6 +59,7 @@ int main (int argc, char **argv) {
     unsigned char recvline[MAXLINE + 1];
     /* Armazena o tamanho da string lida do cliente */
     ssize_t n;
+    struct flock lock;
    
     if (argc != 2) {
         fprintf(stderr,"Uso: %s <Porta>\n",argv[0]);
@@ -249,9 +251,13 @@ int main (int argc, char **argv) {
                     }
                     else {
                         f = fopen(topic, "a");
+                        lock.l_type = F_WRLCK;
+                        fcntl(f, "a", &lock);
+                        fprintf(f, "%s\n", message);
+                        lock.l_type = F_UNLCK;
+                        fcntl(f, "a", &lock);
+                        fclose(f);
                     }
-                    fprintf(f, "%s\n", message);
-                    fclose(f);
 
                 }
 
@@ -296,7 +302,7 @@ int main (int argc, char **argv) {
                     //desconexão - em caso de saída voluntária do cliente - ou uma
                     //requisição de ping - teste de conexão em caso de inatividade por
                     //parte do servidor. Se nenhuma mensagem foi enviada pelo cliente
-                    //em até 0.1 segundos quando da leitura do socket pelo servidor,
+                    //em até 0.001 segundos quando da leitura do socket pelo servidor,
                     //um comando de timeout foi configurado para que o servidor continue
                     //sua principal função de averiguar edições no arquivo do tópico para
                     //envio da útlima linha editada para o cliente. 
@@ -306,7 +312,7 @@ int main (int argc, char **argv) {
                         fclose(f);
                     }
 
-                    time_t old_time;
+                    uint64_t old_time;
                     struct stat file_stat;
                     char* path = malloc((strlen(topic)+3)*sizeof(char));
                     path[0] = '.';
@@ -318,13 +324,13 @@ int main (int argc, char **argv) {
                         perror("stat sub :(\n");
                         exit(2);
                     }
-                    old_time = file_stat.st_mtime;
+                    old_time = file_stat.st_mtim.tv_nsec;
 
-                    //Configuração de timeout de 0.1 segundos para comandos de leitura
-                    //envolvendo o scoket do cliente de 0.1 segundos.
+                    //Configuração de timeout de 0.001 segundos para comandos de leitura
+                    //envolvendo o scoket do cliente de 0.001 segundos.
                     struct timeval tv;
                     tv.tv_sec = 0;
-                    tv.tv_usec = 100000;
+                    tv.tv_usec = 1000;
                     setsockopt(connfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(struct timeval));
 
                     while(1) {
@@ -363,8 +369,8 @@ int main (int argc, char **argv) {
                         //bytes com o nome do tópico efetivamente e strlen(line)-1 bytes
                         //com a mensagem a ser passada para o cliente - (-1) para
                         //desconsiderar o '\n' da string.
-                        if (file_stat.st_mtime != old_time) {
-                            old_time = file_stat.st_mtime;
+                        if (file_stat.st_mtim.tv_nsec != old_time) {
+                            old_time = file_stat.st_mtim.tv_nsec;
                             f = fopen(topic, "r+");
                             char* line = NULL;
                             size_t len = 0;

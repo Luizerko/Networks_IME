@@ -2,7 +2,7 @@
 
 PIDs=();
 
-for i in $(seq 1 50); do
+for i in $(seq 1 10); do
 	mosquitto_sub -t "topico1" -V 5 &
 	PIDs[${i}]=$!;
 done
